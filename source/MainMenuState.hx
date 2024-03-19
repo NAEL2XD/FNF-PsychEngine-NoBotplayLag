@@ -40,7 +40,7 @@ class MainMenuState extends MusicBeatState
 		#if MODS_ALLOWED 'mods', #end
 		#if ACHIEVEMENTS_ALLOWED 'awards', #end
 		'credits',
-		#if !switch 'donate', #end
+		#if !switch '', #end
 		'options'
 	];
 
@@ -297,7 +297,7 @@ class MainMenuState extends MusicBeatState
 			{
 				if (optionShit[curSelected] == 'donate')
 				{
-					CoolUtil.browserLoad('https://ninja-muffin24.itch.io/funkin');
+					CoolUtil.browserLoad('https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag'); // hey man, you forgot this
 				}
 				else
 				{
