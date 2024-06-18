@@ -661,9 +661,7 @@ class TitleState extends MusicBeatState
 					addMoreText('RiverOaken', 15);
 					addMoreText('shubs', 15);
 					addMoreText('Jordan Santiago', 15);
-					addMoreText('and', 15);
 					addMoreText('Nael2xd', 15);
-					addMoreText('for the mod', 15);
 					#else
 					addMoreText('present');
 					#end
@@ -676,13 +674,13 @@ class TitleState extends MusicBeatState
 				// credTextShit.screenCenter();
 				case 6:
 					#if PSYCH_WATERMARKS
-					createCoolText(['Sure man'], -40);
+					createCoolText(['Is that spam'], -40);
 					#else
-					createCoolText(['Sure man'], -40);
+					createCoolText(['Is that spam'], -40);
 					#end
 				case 8:
-					addMoreText('sure', -40);
-					ngSpr.visible = true; // omg the ng logo but i switch it
+					addMoreText('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', -40);
+					ngSpr.visible = true; // omg the ng logo but i switch it (nvm)
 				// credTextShit.text += '\nNewgrounds & GitHub';
 				case 9:
 					deleteCoolText();
@@ -699,17 +697,18 @@ class TitleState extends MusicBeatState
 				// credTextShit.text += '\nlmao';
 				case 13:
 					deleteCoolText();
+					addMoreText('Naels');
 				// credTextShit.visible = false;
 				// credTextShit.text = "Friday";
 				// credTextShit.screenCenter();
 				case 14:
-					addMoreText('Naels');
+					addMoreText('Ultimate');
 				// credTextShit.visible = true;
 				case 15:
-					addMoreText('Ultimate');
+					addMoreText('Spamming');
 				// credTextShit.text += '\nNight';
 				case 16:
-					addMoreText('Spamming mod'); // credTextShit.text += '\nFunkin';
+					addMoreText('Mod'); // credTextShit.text += '\nFunkin';
 
 				case 17:
 					skipIntro();
