@@ -1235,7 +1235,7 @@ class CharacterEditorState extends MusicBeatState
 	function updatePresence() {
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("Character Editor", "Character: " + daAnim, leHealthIcon.getCharacter());
+		DiscordClient.changePresence("Editing a Character.", "Editing: " + daAnim, leHealthIcon.getCharacter());
 		#end
 	}
 
@@ -1248,7 +1248,7 @@ class CharacterEditorState extends MusicBeatState
 
 			var curAnim:FlxAnimation = char.animation.getByName(char.animationsArray[curAnim].anim);
 			if(curAnim == null || curAnim.frames.length < 1) {
-				textAnim.text += ' (ERROR!)';
+				textAnim.text += ' (XML WAS NOT FOUND)';
 			}
 		} else {
 			textAnim.text = '';

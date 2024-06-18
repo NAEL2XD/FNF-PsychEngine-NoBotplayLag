@@ -96,7 +96,7 @@ var konamiIndex:Int = 0; // Track the progress in the Konami code sequence
 		FlxG.cameras.list[FlxG.cameras.list.indexOf(subCamera)].follow(camFollowPos);
 
 		#if desktop
-		DiscordClient.changePresence("Options Menu", null);
+		DiscordClient.changePresence("On the options editing cool stuff", null);
 		#end
 
 		var yScroll:Float = Math.max(0.25 - (0.05 * (options.length - options.length)), 0.1);
