@@ -69,7 +69,7 @@ class MainMenuState extends MusicBeatState
 
 		#if desktop
 		// Updating Discord Rich Presence
-		DiscordClient.changePresence("In the Menus", null);
+		DiscordClient.changePresence("In menu scrolling stuff", null);
 		#end
 		debugKeys = ClientPrefs.copyKey(ClientPrefs.keyBinds.get('debug_1'));
 
@@ -142,12 +142,11 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 1);
 
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 84, 0, "Happy anniversary, JS Engine!", 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 84, 0, "Nael's Ultimate Spamming Mod (v1.3.0)", 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
-
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 64, 0, "JS Engine: Anniversary Update (v" + psychEngineJSVersion + ")", 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 64, 0, "JS Engine (v" + psychEngineJSVersion + ")", 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
@@ -298,7 +297,7 @@ class MainMenuState extends MusicBeatState
 			{
 				if (optionShit[curSelected] == 'donate')
 				{
-					CoolUtil.browserLoad('https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag'); // hey man, you forgot this
+					CoolUtil.browserLoad('https://github.com/JordanSantiagoYT/FNF-PsychEngine-NoBotplayLag');
 				}
 				else
 				{

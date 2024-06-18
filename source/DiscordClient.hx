@@ -21,7 +21,7 @@ class DiscordClient
 {
     public static var initialized(default, null):Bool;
 
-    public static final defaultID:String = "1192736165472784445";
+    public static final defaultID:String = "863192846693302305";
 
     public static var applicationID(default, set):String = defaultID;
 

@@ -3101,7 +3101,7 @@ class PlayState extends MusicBeatState
 		}
 
 		#if DISCORD_ALLOWED
-		if (cpuControlled) detailsText = detailsText + ' (using a bot)';
+		if (cpuControlled) detailsText = detailsText + ' (HE CHEATER)';
 		// Updating Discord Rich Presence (with Time Left)
 		DiscordClient.changePresence(detailsText, SONG.song + " (" + storyDifficultyText + ")", iconP2.getCharacter(), true, songLength);
 		#end
