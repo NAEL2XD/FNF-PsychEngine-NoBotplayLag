@@ -30,6 +30,14 @@ class CoolUtil
 		'Normal',
 		'Hard'
 	];
+
+	public static var defaultDifficultiesFull:Array<String> = [
+		'Easy',
+		'Normal',
+		'Hard',
+		'Erect',
+		'Nightmare'
+	];
 	public static var defaultDifficulty:String = 'Normal'; //The chart that has no suffix and starting difficulty on Freeplay/Story Mode
 
 	public static var defaultDifficultyThings:Array<String> = ['Normal', 'normal'];
@@ -39,6 +47,9 @@ class CoolUtil
 	public static var currentDifficulty:String = 'Normal';
 
 	public static var defaultSongs:Array<String> = ['tutorial', 'bopeebo', 'fresh', 'dad battle', 'spookeez', 'south', 'monster', 'pico', 'philly nice', 'blammed', 'satin panties', 'high', 'milf', 'cocoa', 'eggnog', 'winter horrorland', 'senpai', 'roses', 'thorns', 'ugh', 'guns', 'stress'];
+	public static var defaultSongsFormatted:Array<String> = ['dad-battle', 'philly-nice', 'satin-panties', 'winter-horrorland'];
+	
+	public static var defaultCharacters:Array<String> = ['dad', 'gf', 'gf-bent', 'gf-car', 'gf-christmas', 'gf-pixel', 'gf-tankmen', 'mom', 'mom-car', 'monster', 'monster-christmas', 'parents-christmas', 'pico', 'pico-player', 'senpai', 'senpai-angry', 'spirit', 'spooky', 'tankman', 'tankman-player'];
 
 	inline public static function quantize(f:Float, snap:Float){
 		// changed so this actually works lol
@@ -177,14 +188,22 @@ class CoolUtil
 		var secs:String = '' + Math.floor(musicTime / 1000) % 60;
 		var mins:String = "" + Math.floor(musicTime / 1000 / 60) % 60;
 		var hour:String = '' + Math.floor((musicTime / 1000 / 3600)) % 24;
+		var days:String = '' + Math.floor((musicTime / 1000 / 86400)) % 7;
+		var weeks:String = '' + Math.floor((musicTime / 1000 / (86400 * 7)));
 
 		if (secs.length < 2)
 			secs = '0' + secs;
 
 		var shit:String = mins + ":" + secs;
-		if (hour != "0"){
+		if (hour != "0" && days == '0'){
 			if (mins.length < 2) mins = "0"+ mins;
 			shit = hour+":"+mins + ":" + secs;
+		}
+		if (days != "0" && weeks == '0'){
+			shit = days + 'd ' + hour + 'h ' + mins + "m " + secs + 's';
+		}
+		if (weeks != "0"){
+			shit = weeks + 'w ' + days + 'd ' + hour + 'h ' + mins + "m " + secs + 's';
 		}
 		if (precision > 0)
 		{
@@ -224,6 +243,129 @@ class CoolUtil
 			return '0.'+str;
 		}else{
 			return str.substr(0, str.length-prec) + '.'+str.substr(str.length-prec);
+		}
+	}
+
+	static final beats:Array<Int> = [4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192,256,384,512,768,1024,1536,2048,3072,6144];
+
+	public static function checkNoteQuant(note:Note, timeToCheck:Float):Void 
+	{
+		if (note.colorSwap != null && ClientPrefs.noteColorStyle == 'Quant-Based' && (ClientPrefs.showNotes && ClientPrefs.enableColorShader))
+		{
+			var theCurBPM = Conductor.bpm;
+			var stepCrochet:Float = (60 / theCurBPM) * 1000;
+			var latestBpmChangeIndex = -1;
+			var latestBpmChange = null;
+
+			for (i in 0...Conductor.bpmChangeMap.length) {
+				var bpmchange = Conductor.bpmChangeMap[i];
+				if (timeToCheck >= bpmchange.songTime) {
+					latestBpmChangeIndex = i; // Update index of latest change
+					latestBpmChange = bpmchange;
+				}
+			}
+			if (latestBpmChangeIndex >= 0) {
+				theCurBPM = latestBpmChange.bpm;
+				timeToCheck -= latestBpmChange.songTime;
+				stepCrochet = (60 / theCurBPM) * 1000;
+			}
+
+			var beat = Math.round((timeToCheck / stepCrochet) * 48);
+			for (i in 0...beats.length)
+			{
+				if (beat % (192 / beats[i]) == 0)
+				{
+					beat = beats[i];
+					break;
+				}			
+			}
+			switch (beat)
+			{
+				case 4: //red
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 8: //blue
+					note.colorSwap.hue = -0.34;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 12: //purple
+					note.colorSwap.hue = 0.8;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 16: //yellow
+					note.colorSwap.hue = 0.16;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 24: //pink
+					note.colorSwap.hue = 0.91;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 32: //orange
+					note.colorSwap.hue = 0.06;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 48: //cyan
+					note.colorSwap.hue = -0.53;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 64: //green
+					note.colorSwap.hue = -0.7;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = 0;
+				case 96: //salmon lookin ass
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = -0.33;
+					note.colorSwap.brightness = 0;
+				case 128: //light purple shit
+					note.colorSwap.hue = -0.24;
+					note.colorSwap.saturation = -0.33;
+					note.colorSwap.brightness = 0;
+				case 192: //turquioe i cant spell
+					note.colorSwap.hue = 0.44;
+					note.colorSwap.saturation = 0.31;
+					note.colorSwap.brightness = 0;
+				case 256: //shit (the color of it)
+					note.colorSwap.hue = 0.03;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -0.63;
+				case 384: //dark green ugly shit
+					note.colorSwap.hue = 0.29;
+					note.colorSwap.saturation = 1;
+					note.colorSwap.brightness = -0.89;
+				case 512: //darj blue
+					note.colorSwap.hue = -0.33;
+					note.colorSwap.saturation = 0.29;
+					note.colorSwap.brightness = -0.7;
+				case 768: //gray ok
+					note.colorSwap.hue = 0.04;
+					note.colorSwap.saturation = -0.86;
+					note.colorSwap.brightness = -0.23;
+				case 1024: //turqyuarfhiouhifueaig but dark
+					note.colorSwap.hue = 0.46;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -0.46;
+				case 1536: //pure death
+					note.colorSwap.hue = 0;
+					note.colorSwap.saturation = 0;
+					note.colorSwap.brightness = -1;
+				case 2048: //piss and shit color
+					note.colorSwap.hue = 0.2;
+					note.colorSwap.saturation = -0.36;
+					note.colorSwap.brightness = -0.74;
+				case 3072: //boring ass color
+					note.colorSwap.hue = 0.17;
+					note.colorSwap.saturation = -0.57;
+					note.colorSwap.brightness = -0.27;
+				case 6144: //why did i do this? idk tbh, it just funni
+					note.colorSwap.hue = 0.23;
+					note.colorSwap.saturation = 0.76;
+					note.colorSwap.brightness = -0.83;
+				default: // white/gray
+					note.colorSwap.hue = 0.04;
+					note.colorSwap.saturation = -0.86;
+					note.colorSwap.brightness = -0.23;
+			}
 		}
 	}
 	
@@ -437,10 +579,18 @@ class CoolUtil
 		#end
 	}
 
-	public static function getNoteAmount(song:SwagSong):Int {
+	public static function getNoteAmount(song:SwagSong, ?bothSides:Bool = true, ?oppNotes:Bool = false):Int {
 		var total:Int = 0;
 		for (section in song.notes) {
-			total += section.sectionNotes.length;
+			if (bothSides) total += section.sectionNotes.length;
+			else
+			{
+				for (songNotes in section.sectionNotes)
+				{
+					if (!oppNotes && (songNotes[1] < 4 ? section.mustHitSection : !section.mustHitSection)) total += 1;
+					if (oppNotes && (songNotes[1] < 4 ? !section.mustHitSection : section.mustHitSection)) total += 1;
+				}
+			}
 		}
 		return total;
 	}

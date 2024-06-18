@@ -38,7 +38,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		rpcTitle = 'Game Renderer Settings Menu'; //for Discord Rich Presence
 
 		var option:Option = new Option('Video Rendering Mode', //Name
-			'If checked, the game will render each frame as a screenshot into a folder. They can then be rendered into MP4s using FFmpeg.\nThey are located in a folder called gameRenders.\nDo NOT use this if you have a low-end PC!',
+			#if windows 'If checked, the game will render songs you play to an MP4.\nThey will be located in a folder inside assets called gameRenders.' #else 'If checked, the game will render each frame as a screenshot into a folder. They can then be rendered into MP4s using FFmpeg.\nThey are located in a folder called gameRenders.' #end,
 			'ffmpegMode',
 			'bool',
 			false);
@@ -68,6 +68,42 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.onChange = onChangeFramerate;
 		fpsOption = option;
 
+		var option:Option = new Option('Unlock Framerate', //Name
+			'If checked, the framerate will be uncapped while rendering a song.\nNOTE: This does not affect the video framerate!',
+			'unlockFPS',
+			'bool',
+			false);
+		addOption(option);
+
+		var option:Option = new Option('Video Bitrate: ',
+			"Use this option to set your video's bitrate!",
+			'renderBitrate',
+			'float',
+			5.00);
+		addOption(option);
+
+		option.minValue = 1.0;
+		option.maxValue = 100.0;
+		option.scrollSpeed = 5;
+		option.changeValue = 0.01;
+		option.decimals = 2;
+		option.displayFormat = '%v Mbps';
+
+		var option:Option = new Option('Video Encoder: ',
+			"Which video encoder would you like?\nThey all have differences like rendering speed, quality, etc.",
+			'vidEncoder',
+			'string',
+			'libx264',
+			['libx264', 'libx264rgb', 'libx265', 'libxvid', 'libsvtav1', 'mpeg2video']);
+		addOption(option);
+
+		var option:Option = new Option('Classic Rendering Mode', //Name
+			'If checked, the game will use the old Rendering Mode from 1.20.0.',
+			'oldFFmpegMode',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Lossless Screenshots',
 			"If checked, screenshots will save as PNGs.\nOtherwise, It uses JPEG.",
 			'lossless',
@@ -76,7 +112,7 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		addOption(option);
 
 		var option:Option = new Option('JPEG Quality',
-			"Change the JPEG quality in here.\nThe recommended value is 50.",
+			"Change the JPEG quality here.\nThe recommended value is 50.",
 			'quality',
 			'int',
 			50);
@@ -101,12 +137,13 @@ class GameRendererSettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.displayFormat = '%vs';
 
-       		var option:Option = new Option('No Screenshot',
-			"If checked, Skip taking of screenshot.\nIt's a function for debug.",
-			'noCapture',
+		var option:Option = new Option('Show Rendering Time Remaining', //Name
+			'If checked, the game will show how much time is remaining for your video to finish rendering,\nbased on your FPS.',
+			'showRemainingTime',
 			'bool',
 			false);
 		addOption(option);
+
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length-1]];
 		

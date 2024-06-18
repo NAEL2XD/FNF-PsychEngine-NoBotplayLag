@@ -44,11 +44,22 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	inline public static var VIDEO_EXT = "mp4";
 
+	public static var defaultNoteSprite:FlxSprite;
+
 	private static var noteFrames:FlxFramesCollection;
 	private static var noteAnimation:FlxAnimationController;
 
 	public static var noteSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
 	public static var noteSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
+
+	private static var splashFrames:FlxFramesCollection;
+	private static var splashAnimation:FlxAnimationController;
+
+	public static var splashSkinFramesMap:Map<String, FlxFramesCollection> = new Map();
+	public static var splashSkinAnimsMap:Map<String, FlxAnimationController> = new Map();
+
+	public static var splashConfigs:Map<String, NoteSplash.NoteSplashConfig> = new Map();
+	public static var splashAnimCountMap:Map<String, Int> = new Map();
 
 	#if MODS_ALLOWED
 	public static var ignoreModFolders:Array<String> = [
@@ -70,27 +81,199 @@ class Paths
 	];
 	#end
 
+	public static var defaultSkin = 'NOTE_assets'; 
 	//Function that initializes the first note. This way, we can recycle the notes
+	public static function initDefaultSkin(keys:Int = 4, noteSkin:String, inEditor:Bool = false)
+	{
+		if (ClientPrefs.noteStyleThing == 'Default')
+			defaultSkin = 'NOTE_assets';
+		if(ClientPrefs.noteStyleThing == 'VS Nonsense V2') {
+			defaultSkin = 'Nonsense_NOTE_assets';
+		}
+		if(ClientPrefs.noteStyleThing == 'DNB 3D') {
+			defaultSkin = 'NOTE_assets_3D';
+		}
+		if(ClientPrefs.noteStyleThing == 'VS AGOTI') {
+			defaultSkin = 'AGOTINOTE_assets';
+		}
+		if(ClientPrefs.noteStyleThing == 'Doki Doki+') {
+			defaultSkin = 'NOTE_assets_doki';
+		}
+		if(ClientPrefs.noteStyleThing == 'TGT V4') {
+			defaultSkin = 'TGTNOTE_assets';
+		}
+		if (ClientPrefs.noteStyleThing != 'VS Nonsense V2' && ClientPrefs.noteStyleThing != 'DNB 3D' && ClientPrefs.noteStyleThing != 'VS AGOTI' && ClientPrefs.noteStyleThing != 'Doki Doki+' && ClientPrefs.noteStyleThing != 'TGT V4' && ClientPrefs.noteStyleThing != 'Default') {
+			defaultSkin = 'NOTE_assets_' + ClientPrefs.noteStyleThing.toLowerCase();
+		}
+		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && (inEditor || PlayState.isPixelStage)) {
+			defaultSkin = ClientPrefs.noteStyleThing == 'TGT V4' ? 'RED_TGTNOTE_assets' : 'RED_NOTE_assets';
+		}
+		if((ClientPrefs.noteColorStyle == 'Quant-Based' || ClientPrefs.noteColorStyle == 'Rainbow') && ClientPrefs.noteStyleThing == 'TGT V4') {
+			defaultSkin = 'RED_TGTNOTE_assets';
+		}
+		if(ClientPrefs.noteColorStyle == 'Char-Based') {
+			defaultSkin = 'NOTE_assets_colored';
+		}
+		if(ClientPrefs.noteColorStyle == 'Grayscale') {
+			defaultSkin = 'GRAY_NOTE_assets';
+		}
+		if (noteSkin != null && noteSkin.length > 1) defaultSkin = noteSkin;
+		trace(defaultSkin);
+	}
+
 	public static function initNote(keys:Int = 4, noteSkin:String = 'NOTE_assets')
 	{
-		noteFrames = getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets');
-
 		// Do this to be able to just copy over the note animations and not reallocate it
 
 		var spr:FlxSprite = new FlxSprite();
-		spr.frames = noteFrames;
-		noteAnimation = new FlxAnimationController(spr);
+		spr.frames = getSparrowAtlas(noteSkin != null && noteSkin.length > 1 ? noteSkin : defaultSkin);
 
 		// Use a for loop for adding all of the animations in the note spritesheet, otherwise it won't find the animations for the next recycle
 		for (d in 0...keys)
 		{
-			noteAnimation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
-			noteAnimation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
-			noteAnimation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
-			noteAnimation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
+			spr.animation.addByPrefix('purpleholdend', 'pruple end hold'); // ?????
+			spr.animation.addByPrefix(Note.colArray[d] + 'holdend', Note.colArray[d] + ' hold end');
+			spr.animation.addByPrefix(Note.colArray[d] + 'hold', Note.colArray[d] + ' hold piece');
+			spr.animation.addByPrefix(Note.colArray[d] + 'Scroll', Note.colArray[d] + '0');
 		}
-		noteSkinFramesMap.set(noteSkin, getSparrowAtlas(noteSkin.length > 1 ? noteSkin : 'NOTE_assets'));
-		noteSkinAnimsMap.set(noteSkin, noteAnimation);
+		noteSkinFramesMap.set(noteSkin, spr.frames);
+		noteSkinAnimsMap.set(noteSkin, spr.animation);
+	}
+
+	//Note Splash initialization
+	public static function initSplash(keys:Int = 4, splashSkin:String = 'noteSplashes')
+	{
+		splashFrames = getSparrowAtlas(splashSkin.length > 1 ? 'noteSplashes/' + splashSkin : 'noteSplashes/noteSplashes');
+		if (splashFrames == null) splashFrames = getSparrowAtlas(splashSkin.length > 1 ? splashSkin : 'noteSplashes/noteSplashes');
+
+		// Do this to be able to just copy over the splash animations and not reallocate it
+
+		var spr:FlxSprite = new FlxSprite();
+		spr.frames = splashFrames;
+		splashAnimation = new FlxAnimationController(spr);
+
+		// Use a for loop for adding all of the animations in the splash spritesheet, otherwise it won't find the animations for the next recycle
+		
+		var config = splashConfigs.get(splashSkin);
+		var maxAnims:Int = 0;
+		var animName = config.anim;
+		if(animName == null)
+			animName = config != null ? config.anim : 'note splash';
+
+		var shouldBreakLoop = false;
+		while(!shouldBreakLoop) {
+			var animID:Int = maxAnims + 1;
+			for (i in 0...Note.colArray.length) {
+				if (!addAnimAndCheck('note$i-$animID', '$animName ${Note.colArray[i]} $animID', 24, false)) {
+					//Reached the maximum amount of anims, break the loop
+					shouldBreakLoop = true;
+					break;
+				}
+			}
+			if (!shouldBreakLoop) maxAnims++;
+			else break;
+			//trace('currently: $maxAnims');
+		}
+		splashSkinFramesMap.set(splashSkin, splashFrames);
+		splashSkinAnimsMap.set(splashSkin, splashAnimation);
+		splashAnimCountMap.set(splashSkin, maxAnims);
+	}
+	public static function addAnimAndCheck(name:String, anim:String, ?framerate:Int = 24, ?loop:Bool = false)
+	{
+		var animFrames = [];
+		@:privateAccess
+		splashAnimation.findByPrefix(animFrames, anim); // adds valid frames to animFrames
+
+		if(animFrames.length < 1) return false;
+	
+		splashAnimation.addByPrefix(name, anim, framerate, loop);
+		return true;
+	}
+	public static function initSplashConfig(skin:String)
+	{
+		var path:String = Paths.getSharedPath('images/noteSplashes/' + skin + '.txt');
+		if (!FileSystem.exists(path)) path = Paths.modsTxt('noteSplashes/' + skin);
+		if (!FileSystem.exists(path)) path = Paths.getSharedPath('images/noteSplashes/noteSplashes.txt');
+		var configFile:Array<String> = CoolUtil.coolTextFile(path);
+
+		if (configFile.length < 1) return null;
+
+		var framerates:Array<String> = configFile[1].split(' ');
+		var offs:Array<Array<Float>> = [];
+		for (i in 3...configFile.length)
+		{
+			var animOffs:Array<String> = configFile[i].split(' ');
+			offs.push([Std.parseFloat(animOffs[0]), Std.parseFloat(animOffs[1])]);
+		}
+		var config:NoteSplash.NoteSplashConfig = {
+			anim: configFile[0],
+			minFps: Std.parseInt(framerates[0]),
+			maxFps: Std.parseInt(framerates[1]),
+			redAnim: Std.parseInt(configFile[2]),
+			offsets: offs
+		};
+		splashConfigs.set(skin, config);
+		return config;
+	}
+
+	inline public static function mergeAllTextsNamed(path:String, defaultDirectory:String = null, allowDuplicates:Bool = false)
+	{
+		if(defaultDirectory == null) defaultDirectory = getSharedPath();
+		defaultDirectory = defaultDirectory.trim();
+		if(!defaultDirectory.endsWith('/')) defaultDirectory += '/';
+
+		var mergedList:Array<String> = [];
+		var paths:Array<String> = directoriesWithFile(defaultDirectory, path);
+
+		var defaultPath:String = 'assets/$defaultDirectory' + path;
+		if(paths.contains(defaultPath))
+		{
+			paths.remove(defaultPath);
+			paths.insert(0, defaultPath);
+		}
+
+		for (file in paths)
+		{
+			var list:Array<String> = CoolUtil.coolTextFile(file);
+			for (value in list)
+				if((allowDuplicates || !mergedList.contains(value)) && value.length > 0)
+					mergedList.push(value);
+		}
+		return mergedList;
+	}
+	inline public static function directoriesWithFile(path:String, fileToFind:String, mods:Bool = true)
+	{
+		var assetDirectory:String = 'assets/$path';
+		if (path.startsWith('assets/')) assetDirectory = path;
+		var foldersToCheck:Array<String> = [];
+		#if sys
+		if(FileSystem.exists(assetDirectory + fileToFind))
+		#end
+			foldersToCheck.push(assetDirectory + fileToFind);
+
+		#if MODS_ALLOWED
+		if(mods)
+		{
+			// Global mods first
+			for(mod in getGlobalMods())
+			{
+				var folder:String = Paths.mods(mod + '/' + path + fileToFind);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
+			}
+
+			// Then "PsychEngine/mods/" main folder
+			var folder:String = Paths.mods(path + fileToFind);
+			if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(Paths.mods(path + fileToFind));
+
+			// And lastly, the loaded mod's folder
+			if(currentModDirectory != null && currentModDirectory.length > 0)
+			{
+				var folder:String = Paths.mods(currentModDirectory + '/' + path + fileToFind);
+				if(FileSystem.exists(folder) && !foldersToCheck.contains(folder)) foldersToCheck.push(folder);
+			}
+		}
+		#end
+		return foldersToCheck;
 	}
 
 	public static function excludeAsset(key:String) {
@@ -226,6 +409,10 @@ class Paths
 	{
 		return 'assets/$file';
 	}
+	inline public static function getSharedPath(file:String = '')
+	{
+		return 'assets/shared/$file';
+	}
 
 	inline static public function file(file:String, type:AssetType = TEXT, ?library:String)
 	{
@@ -290,6 +477,8 @@ class Paths
 	//Loads the Voices. Crucial for generateSong
 	static public function voices(song:String, ?difficulty:String = ''):Any
 	{
+		var formattedDifficulty:String = formatToSongPath(difficulty);
+		if (difficulty.contains(' ')) difficulty = formattedDifficulty;
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Voices.$SOUND_EXT';
 		#else
@@ -298,19 +487,20 @@ class Paths
 			var songKey:String = '${formatToSongPath(song)}/Voices-$difficulty';
 			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
 			{
-				var voices = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				var voices = returnSound('songs', songKey);
 				return voices;
 			}
 		}
 		var songKey:String = '${formatToSongPath(song)}/Voices';
 		var voices = returnSound('songs', songKey);
-		if (!ClientPrefs.progAudioLoad) voices = returnSoundFull('songs', songKey);
 		return voices;
 		#end
 	}
 	//Loads the instrumental. Crucial for generateSong
 	static public function inst(song:String, ?difficulty:String = ''):Any
 	{
+		var formattedDifficulty:String = formatToSongPath(difficulty);
+		if (difficulty.contains(' ')) difficulty = formattedDifficulty;
 		#if html5
 		return 'songs:assets/songs/${formatToSongPath(song)}/Inst.$SOUND_EXT';
 		#else
@@ -319,15 +509,28 @@ class Paths
 			var songKey:String = '${formatToSongPath(song)}/Inst-$difficulty';
 			if (FileSystem.exists(Paths.modFolders('songs/' + songKey + '.$SOUND_EXT')) || FileSystem.exists('assets/songs/' + songKey + '.$SOUND_EXT')) 
 			{
-				var inst = (ClientPrefs.progAudioLoad ? returnSound('songs', songKey) : returnSoundFull('songs', songKey));
+				var inst = returnSound('songs', songKey);
 				return inst;
 			}
 		}
 		var songKey:String = '${formatToSongPath(song)}/Inst';
 		var inst = returnSound('songs', songKey);
-		if (!ClientPrefs.progAudioLoad) inst = returnSoundFull('songs', songKey);
 		return inst;
 		#end
+	}
+
+	//For song events.
+	static public function songEvents(song:String, ?difficulty:String, ?onlyEventsString:Bool = false):String {
+		if (difficulty != null) {
+			var formattedDifficulty:String = formatToSongPath(difficulty);
+			if (difficulty.contains(' ')) difficulty = formattedDifficulty;
+			
+			var eventsKey:String = formatToSongPath(song) + '/events-${difficulty.toLowerCase()}';
+			if (FileSystem.exists(Paths.json(eventsKey)) || FileSystem.exists(Paths.modsJson(eventsKey)))
+				return (!onlyEventsString ? eventsKey : 'events-${difficulty.toLowerCase()}');
+		}
+		var eventsKey:String = formatToSongPath(song) + '/events';
+		return (!onlyEventsString ? eventsKey : 'events');
 	}
 
 	//Loads images.
@@ -529,37 +732,6 @@ class Paths
 		trace('oh no its returning null NOOOO ($file)');
 		return null;
 	}
-	//Ditto, but returns the full sound instead
-	public static function returnSoundFull(path:String, key:String, ?library:String) {
-		#if MODS_ALLOWED
-		var file:String = modsSounds(path, key);
-		if(FileSystem.exists(file)) {
-			if(!currentTrackedSounds.exists(file)) {
-				currentTrackedSounds.set(file, Sound.fromFile(file));
-			}
-			localTrackedAssets.push(key);
-			return currentTrackedSounds.get(file);
-		}
-		#end
-		// I hate this so god damn much
-		var gottenPath:String = getPath('$path/$key.$SOUND_EXT', SOUND, library);
-		gottenPath = gottenPath.substring(gottenPath.indexOf(':') + 1, gottenPath.length);
-		// trace(gottenPath);
-		if (FileSystem.exists(gottenPath))
-			if(!currentTrackedSounds.exists(gottenPath))
-			#if MODS_ALLOWED
-				currentTrackedSounds.set(gottenPath, Sound.fromFile('./' + gottenPath));
-			#else
-			{
-				var folder:String = '';
-				if(path == 'songs') folder = 'songs:';
-
-				currentTrackedSounds.set(gottenPath, OpenFlAssets.getSound(folder + getPath('$path/$key.$SOUND_EXT', SOUND, library)));
-			}
-			#end
-		localTrackedAssets.push(gottenPath);
-		return currentTrackedSounds.get(gottenPath);
-	}
 
 	#if MODS_ALLOWED
 	//Loads mods.
@@ -676,5 +848,88 @@ class Paths
 		}
 		return list;
 	}
+	#end
+
+	#if flxanimate
+	public static function loadAnimateAtlas(spr:FlxAnimate, folderOrImg:Dynamic, spriteJson:Dynamic = null, animationJson:Dynamic = null)
+	{
+		var changedAnimJson = false;
+		var changedAtlasJson = false;
+		var changedImage = false;
+		
+		if(spriteJson != null)
+		{
+			changedAtlasJson = true;
+			spriteJson = File.getContent(spriteJson);
+		}
+
+		if(animationJson != null) 
+		{
+			changedAnimJson = true;
+			animationJson = File.getContent(animationJson);
+		}
+
+		// is folder or image path
+		if(Std.isOfType(folderOrImg, String))
+		{
+			var originalPath:String = folderOrImg;
+			for (i in 0...10)
+			{
+				var st:String = '$i';
+				if(i == 0) st = '';
+
+				if(!changedAtlasJson)
+				{
+					spriteJson = getTextFromFile('images/$originalPath/spritemap$st.json');
+					if(spriteJson != null)
+					{
+						//trace('found Sprite Json');
+						changedImage = true;
+						changedAtlasJson = true;
+						folderOrImg = Paths.image('$originalPath/spritemap$st');
+						break;
+					}
+				}
+				else if(Paths.fileExists('images/$originalPath/spritemap$st.png', IMAGE))
+				{
+					//trace('found Sprite PNG');
+					changedImage = true;
+					folderOrImg = Paths.image('$originalPath/spritemap$st');
+					break;
+				}
+			}
+
+			if(!changedImage)
+			{
+				//trace('Changing folderOrImg to FlxGraphic');
+				changedImage = true;
+				folderOrImg = Paths.image(originalPath);
+			}
+
+			if(!changedAnimJson)
+			{
+				//trace('found Animation Json');
+				changedAnimJson = true;
+				animationJson = getTextFromFile('images/$originalPath/Animation.json');
+			}
+		}
+
+		//trace(folderOrImg);
+		//trace(spriteJson);
+		//trace(animationJson);
+		spr.loadAtlasEx(folderOrImg, spriteJson, animationJson);
+	}
+
+	/*private static function getContentFromFile(path:String):String
+	{
+		var onAssets:Bool = false;
+		var path:String = Paths.getPath(path, TEXT, true);
+		if(FileSystem.exists(path) || (onAssets = true && Assets.exists(path, TEXT)))
+		{
+			//trace('Found text: $path');
+			return !onAssets ? File.getContent(path) : Assets.getText(path);
+		}
+		return null;
+	}*/
 	#end
 }

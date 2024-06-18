@@ -56,6 +56,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool',
 			true);
 		addOption(option);
+		
+		var option:Option = new Option('Show Combo',
+			'If checked, the game will show your current combo.',
+			'showComboInfo',
+			'bool',
+			true);
+		addOption(option);
 
 		var option:Option = new Option('Max Splashes: ',
 			"How many note splashes should be allowed on screen at the same time?\n(0 means no limit)",
@@ -101,6 +108,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
+		var option:Option = new Option('Old Sustain Note Style',
+			'If checked, sustain notes will react like how they did before 0.3.X.',
+			'oldSusStyle',
+			'bool',
+			false);
+		addOption(option);
+
 		var option:Option = new Option('Show Rendered Notes',
 			'If checked, the game will show how many notes are currently rendered on screen.',
 			'showRendered',
@@ -142,6 +156,13 @@ class VisualsUISubState extends BaseOptionsMenu
 			'bool',
 			false);
 		addOption(option);
+		
+		var option:Option = new Option('Botplay Watermark',
+			'If checked, some texts will have a watermark if Botplay is enabled.',
+			'botWatermark',
+			'bool',
+			true);
+		addOption(option);
 
 		var option:Option = new Option('Miss Rating',
 			"If unchecked, a Miss rating won't popup when you miss a note.",
@@ -154,7 +175,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'If unchecked, the results screen will be skipped.',
 			'resultsScreen',
 			'bool',
-			true);
+			false);
 		addOption(option);
 
 		var option:Option = new Option('Compact UI Numbers',
@@ -216,13 +237,19 @@ class VisualsUISubState extends BaseOptionsMenu
 		option.displayFormat = '%vX';
 		addOption(option);
 
-		var option:Option = new Option('Rating Quotes',
-			"What should the rating names display?",
-			'rateNameStuff',
-			'string',
-			'Quotes',
-			['Quotes', 'Letters', 'Psych Quotes', 'Shaggyverse Quotes']);
-		addOption(option);
+		var ratingQuoteList:Array<String> = Paths.mergeAllTextsNamed('ratingQuotes/list.txt', 'data', false);
+		if (ratingQuoteList.length > 0)
+		{
+			if (!ratingQuoteList.contains(ClientPrefs.rateNameStuff))
+				ClientPrefs.rateNameStuff = ratingQuoteList[0];
+			var option:Option = new Option('Rating Quotes',
+				"What should the rating names display?",
+				'rateNameStuff',
+				'string',
+				'Quotes',
+				ratingQuoteList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('Golden Sick on MFC/SFC',
 			'If checked, your Sick! & Perfect!! ratings will be golden if your FC rating is better than GFC.',
@@ -310,12 +337,52 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Time Left', 'Time Elapsed', 'Song Name', 'Modern Time', 'Song Name + Time', 'Time Left (No Bar)', 'Time Elapsed (No Bar)', 'Modern Time (No Bar)', 'Disabled']);
 		addOption(option);
 
-		var option:Option = new Option('HUD Type:',
-			"Which HUD would you like?",
-			'hudType',
+		var option:Option = new Option('ScoreTxt Style:',
+			"How would you like your scoreTxt to look like?",
+			'scoreStyle',
 			'string',
-			'VS Impostor',
-			['VS Impostor', 'Kade Engine', 'Tails Gets Trolled V4', 'Dave and Bambi', 'Doki Doki+', 'Psych Engine', 'Leather Engine', 'JS Engine']);
+			'Psych Engine',
+			['Psych Engine', 'VS Impostor', 'Kade Engine', 'Forever Engine', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
+		addOption(option);
+
+		var option:Option = new Option('Time Bar Style:',
+			"How would you like the Time Bar to look like?",
+			'timeBarStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'Kade Engine', 'VS Impostor', 'TGT V4', 'Dave Engine', 'Doki Doki+', 'Leather Engine', 'JS Engine']);
+		addOption(option);
+
+		var option:Option = new Option('Health Bar Style:',
+			"How would you like your Health Bar to look?",
+			'healthBarStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'Dave Engine', 'Doki Doki+']);
+		addOption(option);
+
+		var option:Option = new Option('Watermark Style:',
+			"How would you like your Watermark to look?",
+			'watermarkStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'Dave Engine', 'JS Engine', 'Forever Engine', 'Hide']);
+		addOption(option);
+
+		var option:Option = new Option('Bot Txt Style:',
+			"How would you like your Botplay text to look?",
+			'botTxtStyle',
+			'string',
+			'Vanilla',
+			['Vanilla', 'JS Engine', 'Dave Engine', 'Doki Doki+', 'TGT V4', 'VS Impostor', 'Hide']);
+		addOption(option);
+
+		var option:Option = new Option('YT Watermark Position:',
+			"Where do you want your YouTube watermark to be?",
+			'ytWatermarkPosition',
+			'string',
+			'Hidden',
+			['Top', 'Middle', 'Bottom', 'Hidden']);
 		addOption(option);
 
 		var option:Option = new Option('Strum Light Up Style:',
@@ -347,7 +414,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'ratingType',
 			'string',
 			'Base FNF',
-			['Base FNF', 'Kade Engine', 'Tails Gets Trolled V4', 'Doki Doki+', 'NMCW', 'VS Impostor', 'FIRE IN THE HOLE', 'Simple']);
+			['Base FNF', 'Kade Engine', 'Tails Gets Trolled V4', 'Doki Doki+', 'NMCW', 'VS Impostor', 'FIRE IN THE HOLE', 'Yeahs', 'Simple']);
 		addOption(option);
 
 		var option:Option = new Option('Icon Bounce:',
@@ -358,13 +425,19 @@ class VisualsUISubState extends BaseOptionsMenu
 			['Golden Apple', 'Dave and Bambi', 'Old Psych', 'New Psych', 'VS Steve', 'Plank Engine', 'Strident Crisis', 'SB Engine', 'None']);
 		addOption(option);
 
-		var option:Option = new Option('Note Splash Type:',
-			"Which note splash would you like?",
-			'splashType',
-			'string',
-			'Psych Engine',
-			['Psych Engine', 'VS Impostor', 'Base Game', 'Doki Doki+', 'TGT V4', 'Indie Cross']);
-		addOption(option);
+		var noteSplashList:Array<String> = Paths.mergeAllTextsNamed('images/noteSplashes/list.txt');
+		if (noteSplashList.length > 0)
+		{
+			if (!noteSplashList.contains(ClientPrefs.splashType))
+				ClientPrefs.splashType = noteSplashList[0];
+			var option:Option = new Option('Note Splash Type:',
+				"Which note splash would you like?",
+				'splashType',
+				'string',
+				'Psych Engine',
+				noteSplashList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('long ass health bar',
 			"If this is checked, the Health Bar will become LOOOOOONG",
@@ -512,7 +585,7 @@ class VisualsUISubState extends BaseOptionsMenu
 			'daMenuMusic',
 			'string',
 			'Default',
-			['Default', 'Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
+			['Default', 'Old', 'Mashup', 'Base Game', 'DDTO+', 'Dave & Bambi', 'Dave & Bambi (Old)', 'VS Impostor', 'VS Nonsense V2']);
 		addOption(option);
 		option.onChange = onChangeMenuMusic;
 		

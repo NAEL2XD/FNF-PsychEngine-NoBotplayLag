@@ -9,6 +9,7 @@ import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
+import flixel.math.FlxRect;
 import Section.SwagSection;
 #if MODS_ALLOWED
 import sys.io.File;
@@ -31,6 +32,7 @@ typedef CharacterFile = {
 	var position:Array<Float>;
 	var camera_position:Array<Float>;
 
+	var isPlayer:Null<Bool>;
 	var flip_x:Bool;
 	var no_antialiasing:Bool;
 	var healthbar_colors:Array<Int>;
@@ -63,6 +65,7 @@ class Character extends FlxSprite
 	public var debugMode:Bool = false;
 
 	public var isPlayer:Bool = false;
+	public var usePlayerOffsets:Bool = false;
 	public var curCharacter:String = DEFAULT_CHARACTER;
 
 	public var colorTween:FlxTween;
@@ -204,8 +207,13 @@ class Character extends FlxSprite
 					updateHitbox();
 				}
 
+				var jsonPlayerWasNull = false;
+
+				usePlayerOffsets = json.isPlayer != null ? json.isPlayer : (character.contains('bf') || character.endsWith('-player') || character.endsWith('playable'));
 				positionArray = json.position;
 				cameraPosition = json.camera_position;
+
+				if (json.isPlayer == null) jsonPlayerWasNull = true;
 
 				healthIcon = json.healthicon;
 				singDuration = json.sing_duration;
@@ -260,42 +268,54 @@ class Character extends FlxSprite
 						if(anim.offsets != null && anim.offsets.length > 1) {
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 						}
+						if (!jsonPlayerWasNull && !CoolUtil.defaultCharacters.contains(curCharacter) && anim.anim.length > 0 && anim.name.length > 0 && (anim.anim == 'singRIGHT' && anim.name.toLowerCase().contains('left') || anim.anim == 'singLEFT' && animName.toLowerCase().contains('right'))) usePlayerOffsets = true;
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');
 				}
 				//trace('Loaded file to character ' + curCharacter);
 		}
-		originalFlipX = flipX;
 
 		if(animOffsets.exists('singLEFTmiss') || animOffsets.exists('singDOWNmiss') || animOffsets.exists('singUPmiss') || animOffsets.exists('singRIGHTmiss')) hasMissAnimations = true;
 		recalculateDanceIdle();
 		dance();
 
-		if (isPlayer)
+		if (isPlayer != usePlayerOffsets)
 		{
-			flipX = !flipX;
-
-			/*// Doesn't flip for BF, since his are already in the right place???
-			if (!curCharacter.startsWith('bf'))
+			cameraPosition[0] *= -1;
+			positionArray[0] *= -1;
+			if(animation.getByName('singLEFT') != null && animation.getByName('singRIGHT') != null)
 			{
-				// var animArray
-				if(animation.getByName('singLEFT') != null && animation.getByName('singRIGHT') != null)
+				var oldRight = animation.getByName('singRIGHT').frames;
+				animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
+				animation.getByName('singLEFT').frames = oldRight;
+				if (animOffsets.exists('singRIGHT') && animOffsets.exists('singLEFT'))
 				{
-					var oldRight = animation.getByName('singRIGHT').frames;
-					animation.getByName('singRIGHT').frames = animation.getByName('singLEFT').frames;
-					animation.getByName('singLEFT').frames = oldRight;
+					var oldOffsets1 = animOffsets.get('singRIGHT');
+					var oldOffsets2 = animOffsets.get('singLEFT');
+					animOffsets.set('singLEFT', oldOffsets1);
+					animOffsets.set('singRIGHT', oldOffsets2);
 				}
+			}
 
-				// IF THEY HAVE MISS ANIMATIONS??
-				if (animation.getByName('singLEFTmiss') != null && animation.getByName('singRIGHTmiss') != null)
+			// IF THEY HAVE MISS ANIMATIONS??
+			if (animation.getByName('singLEFTmiss') != null && animation.getByName('singRIGHTmiss') != null)
+			{
+				var oldMiss = animation.getByName('singRIGHTmiss').frames;
+				animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
+				animation.getByName('singLEFTmiss').frames = oldMiss;
+				if (animOffsets.exists('singRIGHTmiss') && animOffsets.exists('singLEFTmiss'))
 				{
-					var oldMiss = animation.getByName('singRIGHTmiss').frames;
-					animation.getByName('singRIGHTmiss').frames = animation.getByName('singLEFTmiss').frames;
-					animation.getByName('singLEFTmiss').frames = oldMiss;
+					var oldOffsets1 = animOffsets.get('singRIGHTmiss');
+					var oldOffsets2 = animOffsets.get('singLEFTmiss');
+					animOffsets.set('singLEFTmiss', oldOffsets1);
+					animOffsets.set('singRIGHTmiss', oldOffsets2);
 				}
-			}*/
+			}
 		}
+		if (isPlayer)
+			flipX = !flipX;
+		originalFlipX = flipX;
 
 		switch(curCharacter)
 		{
@@ -367,7 +387,7 @@ class Character extends FlxSprite
 
 					if (animation.curAnim.name.endsWith('miss') && animation.curAnim.finished && !debugMode)
 						dance();
-					}
+				}
 			}
 
 			if(animation.curAnim.finished && animation.getByName(animation.curAnim.name + '-loop') != null)
@@ -379,6 +399,36 @@ class Character extends FlxSprite
 	}
 
 	public var danced:Bool = false;
+
+	var drawingFlip:Bool = false;
+
+	public override function getScreenBounds(?newRect:FlxRect, ?camera:FlxCamera):FlxRect
+	{
+		if (drawingFlip)
+		{
+			scale.x *= -1;
+			var bounds = super.getScreenBounds(newRect, camera);
+			scale.x *= -1;
+			return bounds;
+		}
+		return super.getScreenBounds(newRect, camera);
+	}
+
+	public override function draw()
+	{
+		if ((isPlayer != usePlayerOffsets) != (flipX != originalFlipX))
+		{
+			drawingFlip = true;
+			flipX = !flipX;
+			scale.x *= -1;
+			super.draw();
+			flipX = !flipX;
+			scale.x *= -1;
+			drawingFlip = false;
+		}
+		else
+			super.draw();
+	}
 
 	/**
 	 * FOR GF DANCING SHIT
@@ -392,12 +442,12 @@ class Character extends FlxSprite
 				danced = !danced;
 
 				if (danced)
-					playAnim('danceRight' + idleSuffix);
+					inline playAnim('danceRight' + idleSuffix);
 				else
-					playAnim('danceLeft' + idleSuffix);
+					inline playAnim('danceLeft' + idleSuffix);
 			}
 			else if(animation.getByName('idle' + idleSuffix) != null) {
-					playAnim('idle' + idleSuffix);
+					inline playAnim('idle' + idleSuffix);
 			}
 		}
 	}
@@ -410,7 +460,7 @@ class Character extends FlxSprite
 		final daOffset = animOffsets.get(AnimName);
 		if (animOffsets.exists(AnimName))
 		{
-			offset.set(daOffset[0], daOffset[1]);
+			offset.set(daOffset[0] * (isPlayer != usePlayerOffsets ? -1 : 1), daOffset[1]);
 		}
 		else
 			offset.set(0, 0);
@@ -441,7 +491,7 @@ class Character extends FlxSprite
 				animationNotes.push(songNotes);
 			}
 		}
-		TankmenBG.animationNotes = animationNotes;
+		stages.objects.TankmenBG.animationNotes = animationNotes;
 		animationNotes.sort(sortAnims);
 	}
 

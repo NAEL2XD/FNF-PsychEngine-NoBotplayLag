@@ -85,46 +85,9 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			true);
 		addOption(option);
 
-		var option:Option = new Option('Score Affected by Combo',
-			"Should the score be affected by the combo?",
-			'comboScoreEffect',
-			'bool',
-			false);
-		addOption(option);
-
-	if (ClientPrefs.comboScoreEffect)
-	{
-		var option:Option = new Option('Combo Mult Type:',
-			"What type of combo multiplier do you want?",
-			'comboMultiType',
-			'string',
-			'osu!',
-			['osu!', 'Voiid Chronicles']);
-		addOption(option);
-
-		var option:Option = new Option('Combo Mult Limit: ', //Name
-			'What should the Combo Multiplier Limit be? \n(Values over 10 will not have score saving)', //Description
-			'comboMultLimit', //Save data variable name
-			'float', //Variable type
-			5); //Default value
-		option.scrollSpeed = 2;
-		option.minValue = 1;
-		option.maxValue = 100;
-		option.changeValue = 0.1;
-		option.displayFormat = '%vX';
-		addOption(option);
-	}
-
 		var option:Option = new Option('Complex Accuracy',
 			"If checked, accuracy is MS-based instead of rating-based.",
 			'complexAccuracy',
-			'bool',
-			false);
-		addOption(option);
-
-		var option:Option = new Option('Hold Note Hits',
-			"If checked, each piece of a hold note will also count as a note hit.",
-			'holdNoteHits',
 			'bool',
 			false);
 		addOption(option);
@@ -286,13 +249,20 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 
-		var option:Option = new Option('Hitsound:',
-			"What type of hitsound would you like?",
-			'hitsoundType',
-			'string',
-			'osu!mania',
-			['osu!mania', 'Dave And Bambi', 'Indie Cross', 'Snap', 'Clap', 'Generic Click', 'Keyboard Click', 'vine boom', 'ADOFAI', 'Discord Ping', "i'm spongebob!", 'FIRE IN THE HOLE']);
-		addOption(option);
+		var hitsoundList:Array<String> = Paths.mergeAllTextsNamed('sounds/hitsounds/list.txt');
+		if (hitsoundList.length > 0)
+		{
+			if (!hitsoundList.contains(ClientPrefs.hitsoundType))
+				ClientPrefs.hitsoundType = hitsoundList[0];
+
+			var option:Option = new Option('Hitsound:',
+				"What type of hitsound would you like?",
+				'hitsoundType',
+				'string',
+				'osu!mania',
+				hitsoundList);
+			addOption(option);
+		}
 
 		var option:Option = new Option('Rating Offset',
 			'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.',

@@ -165,6 +165,7 @@ class FunkinLua {
 		set('ratingName', '');
 		set('ratingFC', '');
 		set('version', MainMenuState.psychEngineVersion.trim());
+		set('jsVersion', MainMenuState.psychEngineJSVersion.trim());
 
 		set('inGameOver', false);
 		set('mustHitSection', false);
@@ -515,7 +516,7 @@ class FunkinLua {
 			if(exclusions==null)exclusions=[];
 
 			Lua.getglobal(lua, 'scriptName');
-			var daScriptName = Lua.tostring(lua, -1);
+			final daScriptName = Lua.tostring(lua, -1);
 			Lua.pop(lua, 1);
 			if(ignoreSelf && !exclusions.contains(daScriptName))exclusions.push(daScriptName);
 			PlayState.instance.callOnLuas(funcName, args, ignoreStops, exclusions);
@@ -1371,7 +1372,7 @@ class FunkinLua {
 		});*/
 
 		//stupid bietch ass functions
-		Lua_helper.add_callback(lua, "addScore", function(value:Int = 0) {
+		Lua_helper.add_callback(lua, "addScore", function(value:Float = 0) {
 			PlayState.instance.songScore += value;
 			PlayState.instance.RecalculateRating();
 		});
@@ -1388,13 +1389,11 @@ class FunkinLua {
 			PlayState.instance.RecalculateRating();
 		});
 		Lua_helper.add_callback(lua, "addNPS", function(value:Int = 0) {
-			for (i in 0...Std.int(value))
-			{
-				PlayState.instance.nps += value;
-			}
+			PlayState.instance.nps += value;
 		});
-		Lua_helper.add_callback(lua, "setScore", function(value:Int = 0) {
-			PlayState.instance.songScore = value;
+		Lua_helper.add_callback(lua, "setScore", function(value:Float = 0) {
+			var newScore:Float = value;
+			PlayState.instance.songScore = newScore;
 			PlayState.instance.RecalculateRating();
 		});
 		Lua_helper.add_callback(lua, "setMisses", function(value:Int = 0) {
@@ -1574,10 +1573,10 @@ class FunkinLua {
 		Lua_helper.add_callback(lua, "precacheMusic", function(name:String) {
 			CoolUtil.precacheMusic(name);
 		});
-		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic) {
+		Lua_helper.add_callback(lua, "triggerEvent", function(name:String, arg1:Dynamic, arg2:Dynamic, strumTime:Float) {
 			var value1:String = arg1;
 			var value2:String = arg2;
-			PlayState.instance.triggerEventNote(name, value1, value2);
+			PlayState.instance.triggerEventNote(name, value1, value2, strumTime);
 			//trace('Triggered event: ' + name + ', ' + value1 + ', ' + value2);
 			return true;
 		});
@@ -2826,15 +2825,11 @@ class FunkinLua {
 			}
 			
 		});	
-		Lua_helper.add_callback(lua, "addGlitchEffect", function(camera:String,waveSpeed:Float = 0.1,waveFrq:Float = 0.1,waveAmp:Float = 0.1) {
-			
+		Lua_helper.add_callback(lua, "addGlitchEffect", function(camera:String,waveSpeed:Float = 0.1,waveFrq:Float = 0.1,waveAmp:Float = 0.1) {	
 			PlayState.instance.addShaderToCamera(camera, new GlitchEffect(waveSpeed,waveFrq,waveAmp));
-			
 		});
 		Lua_helper.add_callback(lua, "addGlitchShader", function(camera:String,waveAmp:Float = 0.1,waveFrq:Float = 0.1,waveSpeed:Float = 0.1) {
-			
 			PlayState.instance.addShaderToCamera(camera, new GlitchEffect(waveSpeed,waveFrq,waveAmp));
-			
 		});
 		Lua_helper.add_callback(lua, "addPulseEffect", function(camera:String,waveSpeed:Float = 0.1,waveFrq:Float = 0.1,waveAmp:Float = 0.1) {
 			
@@ -2870,6 +2865,9 @@ class FunkinLua {
 			
 			PlayState.instance.addShaderToCamera(camera, new BloomEffect(blurSize/512.0,intensity));
 			
+		});
+		Lua_helper.add_callback(lua, "addBlockedGlitchEffect", function(camera:String, res:Float = 1280, time:Float = 1, colorMult:Float = 1, colorTransform:Bool = true) {	
+			PlayState.instance.addShaderToCamera(camera, new BlockedGlitchEffect(res, time, colorMult, colorTransform));
 		});
 		Lua_helper.add_callback(lua, "clearEffects", function(camera:String) {
 			PlayState.instance.clearShaderFromCamera(camera);
