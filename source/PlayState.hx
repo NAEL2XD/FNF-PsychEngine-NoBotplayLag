@@ -673,25 +673,25 @@ class PlayState extends MusicBeatState
 
 		var rating:Rating = new Rating('sick');
 		rating.ratingMod = 1;
-		rating.score = 350;
+		rating.score = 25;
 		rating.noteSplash = true;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('good');
 		rating.ratingMod = 0.7;
-		rating.score = 200;
+		rating.score = 10;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('bad');
 		rating.ratingMod = 0.4;
-		rating.score = 100;
+		rating.score = 5;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
 		var rating:Rating = new Rating('shit');
 		rating.ratingMod = 0;
-		rating.score = 50;
+		rating.score = 1;
 		rating.noteSplash = false;
 		ratingsData.push(rating);
 
@@ -6715,11 +6715,11 @@ class PlayState extends MusicBeatState
 				combo += 1 * polyphony;
 				if (!ClientPrefs.noMarvJudge)
 				{
-					songScore += 500 * polyphony;
+					songScore += 50 * polyphony;
 				}
 				else if (ClientPrefs.noMarvJudge)
 				{
-					songScore += 350 * polyphony;
+					songScore += 25 * polyphony;
 				}
 				totalNotesPlayed += 1 * polyphony;
 				if (ClientPrefs.showNPS) { //i dont think we should be pushing to 2 arrays at the same time but oh well
