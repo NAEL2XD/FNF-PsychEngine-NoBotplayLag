@@ -21,7 +21,7 @@ class DiscordClient
 {
     public static var initialized(default, null):Bool;
 
-    public static final defaultID:String = "863192846693302305";
+    public static final defaultID:String = "1254042485076918403";
 
     public static var applicationID(default, set):String = defaultID;
 
@@ -88,7 +88,7 @@ class DiscordClient
 
         discordPresence.endTimestamp = Std.int(endTimestamp / 1000);
 
-        discordPresence.largeImageText = "Engine Version: " + MainMenuState.psychEngineJSVersion;
+        discordPresence.largeImageText = "Nael's Ultimate Spamming Mod v1.3.0";
 
 		Discord.UpdatePresence(RawConstPointer.addressOf(discordPresence));
     }
