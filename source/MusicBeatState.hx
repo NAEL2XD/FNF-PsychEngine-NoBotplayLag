@@ -38,9 +38,21 @@ class MusicBeatState extends FlxUIState
 
 	var _psychCameraInitialized:Bool = false;
 
-	public static var windowNameSuffix:String = "";
-	public static var windowNameSuffix2:String = ""; //changes to "Outdated!" if the version of the engine is outdated
+	public static var windowNameSuffix(default, set):String = "";
+	public static var windowNameSuffix2(default, set):String = ""; //changes to "Outdated!" if the version of the engine is outdated
 	public static var windowNamePrefix:String = "Friday Night Funkin': JS Engine";
+
+	// better then updating it all the time which can cause memory leaks
+	static function set_windowNameSuffix(value:String){
+		windowNameSuffix = value;
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
+		return value;
+	}
+	static function set_windowNameSuffix2(value:String){
+		windowNameSuffix = value;
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
+		return value;
+	}
 
 	override public function new() {
 		super();
@@ -57,6 +69,8 @@ class MusicBeatState extends FlxUIState
 			openSubState(new CustomFadeTransition(0.7, true));
 		}
 		FlxTransitionableState.skipNextTransOut = false;
+
+		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
 
 	public function initPsychCamera():PsychCamera
@@ -65,13 +79,11 @@ class MusicBeatState extends FlxUIState
 		FlxG.cameras.reset(camera);
 		FlxG.cameras.setDefaultDrawTarget(camera, true);
 		_psychCameraInitialized = true;
-		//trace('initialized psych camera ' + Sys.cpuTime());
 		return camera;
 	}
 
 	override function update(elapsed:Float)
 	{
-		//everyStep();
 		if (oldStep != curStep) oldStep = curStep;
 
 		updateCurStep();
@@ -101,7 +113,6 @@ class MusicBeatState extends FlxUIState
 		});
 
 		super.update(elapsed);
-		Application.current.window.title = windowNamePrefix + windowNameSuffix + windowNameSuffix2;
 	}
 
 	private function updateSection():Void
@@ -184,7 +195,6 @@ class MusicBeatState extends FlxUIState
 	//runs whenever the game hits a beat
 	public function beatHit():Void
 	{
-		//trace('Beat: ' + curBeat);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curBeat = curBeat;
 			stage.curDecBeat = curDecBeat;
@@ -195,7 +205,6 @@ class MusicBeatState extends FlxUIState
 	//runs whenever the game hits a section
 	public function sectionHit():Void
 	{
-		//trace('Section: ' + curSection + ', Beat: ' + curBeat + ', Step: ' + curStep);
 		stagesFunc(function(stage:BaseStage) {
 			stage.curSection = curSection;
 			stage.sectionHit();
