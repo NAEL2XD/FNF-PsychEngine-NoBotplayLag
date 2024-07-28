@@ -23,7 +23,7 @@ import llua.State;
 class DiscordClient
 {
 	public static var isInitialized:Bool = false;
-	private inline static final _defaultID:String = "1192736165472784445";
+	private inline static final _defaultID:String = "1254042485076918403";
 	public static var clientID(default, set):String = _defaultID;
 	private static var presence:DiscordPresence = new DiscordPresence();
 	// hides this field from scripts and reflection in general
@@ -118,7 +118,7 @@ class DiscordClient
 		presence.details = details;
 		presence.smallImageKey = smallImageKey;
 		presence.largeImageKey = largeImageKey;
-		presence.largeImageText = "Engine Version: " + MainMenuState.psychEngineJSVersion;
+		presence.largeImageText = "Nael's Ultimate Spamming Mod v1.4.0";
 		// Obtained times are in milliseconds so they are divided so Discord can use it
 		presence.startTimestamp = Std.int(startTimestamp / 1000);
 		presence.endTimestamp = Std.int(endTimestamp / 1000);
