@@ -946,7 +946,7 @@ class ChartingState extends MusicBeatState
 		check_altAnim = new FlxUICheckBox(check_gfSection.x + 120, check_gfSection.y, null, null, "Alt Animation", 100);
 		check_altAnim.checked = (_song.notes[curSec] != null ? _song.notes[curSec].altAnim : false);
 
-		stepperBeats = new FlxUINumericStepper(10, 100, 1, 4, 1, 8192, 2); //idk why youd need 8k beats in a single section but ok i guess??
+		stepperBeats = new FlxUINumericStepper(10, 100, 1, 4, 1, 999999, 2); //idk why youd need 8k beats in a single section but ok i guess??
 		stepperBeats.value = getSectionBeats();
 		stepperBeats.name = 'section_beats';
 		blockPressWhileTypingOnStepper.push(stepperBeats);
@@ -1531,7 +1531,7 @@ class ChartingState extends MusicBeatState
 		halfSpamNum.color = FlxColor.RED;
 		halfSpamNum.label.color = FlxColor.WHITE;
 
-		stepperStackOffset = new FlxUINumericStepper(10, 80, 1, 1, 0, 8192, 4);
+		stepperStackOffset = new FlxUINumericStepper(10, 80, 1, 1, 0, 999999, 4);
 		stepperStackOffset.name = 'stack_offset';
 		blockPressWhileTypingOnStepper.push(stepperStackOffset);
 
@@ -1554,7 +1554,7 @@ class ChartingState extends MusicBeatState
 		stepperStackSideOffset.name = 'stack_sideways';
 		blockPressWhileTypingOnStepper.push(stepperStackSideOffset);
 
-		stepperShrinkAmount = new FlxUINumericStepper(10, stepperStackSideOffset.y + 30, 1, 1, 0, 8192, 4);
+		stepperShrinkAmount = new FlxUINumericStepper(10, stepperStackSideOffset.y + 30, 1, 1, 0, 999999, 4);
 		stepperShrinkAmount.name = 'shrinker_amount';
 		blockPressWhileTypingOnStepper.push(stepperShrinkAmount);
 
@@ -1595,7 +1595,7 @@ class ChartingState extends MusicBeatState
 			updateGrid(false);
 		});
 
-		var stepperShiftSteps:FlxUINumericStepper = new FlxUINumericStepper(10, shrinkNotesButton.y + 30, 1, 1, -8192, 8192, 4);
+		var stepperShiftSteps:FlxUINumericStepper = new FlxUINumericStepper(10, shrinkNotesButton.y + 30, 1, 1, -999999, 999999, 4);
 		stepperShiftSteps.name = 'shifter_amount';
 		blockPressWhileTypingOnStepper.push(stepperShiftSteps);
 
